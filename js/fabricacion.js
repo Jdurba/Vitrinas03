@@ -988,13 +988,13 @@ function actualizarEstadoPDF() {
         btnPresu.title = ok ? 'Ver presupuesto' : titulo;
     }
 
-    // Exportar exige lo mismo que el PDF más Cliente y Nº Pedido (trazabilidad).
-    // La condición vive en intercambio.js; aquí solo se refleja.
+    // Exportar NO se deshabilita: un botón apagado no puede explicar qué falta
+    // (Firefox no muestra el title de un botón disabled). Al pulsarlo, el aviso
+    // dice qué falta y lleva al configurador si el dato está allí.
     const btnExp = document.getElementById('fabBtnExportar');
     if (btnExp && typeof motivoNoExportar === 'function') {
         const motivo = motivoNoExportar();
-        btnExp.disabled = !!motivo;
-        btnExp.title = motivo || 'Exportar configuración para enviar';
+        btnExp.title = motivo ? `${motivo} Pulsa para saber más.` : 'Exportar configuración para enviar';
     }
 }
 
