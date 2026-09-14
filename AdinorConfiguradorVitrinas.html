@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador de Vitrinas de Aluminio</title>
+
+    <!-- Configuración para todos HTML,  Mensajes y control de Impresion de página  -->
+    <script>
+    window.ADINOR_CONFIG = {
+        tituloModal: 'Adinor · Vitrinas'
+    };
+    window.VERSION_APP = 'V.03';
+
+    // Un único sitio define la versión; la app la muestra donde haga falta.
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.app-version')
+            .forEach(el => { el.textContent = window.VERSION_APP; });
+    });
+    </script>
+
+    <!-- Carga del JS compartido -->
+    <script>
+    document.write(
+        location.hostname.endsWith('github.io')
+        ? '<script src="https://jdurba.github.io/General/ConfigTodos.js?v=1"><\/script>'
+        : '<script src="../General/ConfigTodos.js?v=1"><\/script>'
+    );
+    </script>
+    <!--   Fin de la declaración para todos   Mensajes y control de Impresion -->
+
+    <style>
+        :root {
+            --color-primary: #2D3A4B;
+            --color-secondary: #3498db;
+            --color-accent: #e74c3c;
+            --color-bg: #f5f6fa;
+            --color-card: #ffffff;
+            --color-text: #2D3A4B;
+            --color-text-light: #7f8c8d;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Tipografía: se usa la del sistema en toda la app. Antes había reglas
+           que pedían 'Jost' en fabricación e informe, pero la fuente no se
+           cargaba en ningún sitio (ni aquí ni en ConfigTodos.js), así que nunca
+           llegó a verse. Se retiraron. Para recuperarla haría falta el <link>
+           de Google Fonts, preferiblemente en ConfigTodos.js para todo el
+           ecosistema, ya que su modal también la pide. */
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--color-primary);
+            color: white;
+            padding: 0 0;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        header .container { width: 100%; }
+
+        header h1 {
+            flex: 1;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .app-version {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+            opacity: 0.65; vertical-align: middle; margin-left: 6px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo {
+            height: 46px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (max-width: 600px) {
+            .header-logo {
+                height: 38px;
+            }
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel de Configuración */
+        .config-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section-card {
+            background: var(--color-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+
+        .section-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--color-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--color-secondary);
+            border-radius: 2px;
+        }
+
+        /* Selector de Modelos (Grid Visual) */
+        .modelos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .modelo-card {
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            min-height: 160px;
+        }
+
+        .modelo-card:hover {
+            border-color: var(--color-secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .modelo-card.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .modelo-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--color-secondary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .modelo-placeholder {
+            display: none;
+            height: 80px;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #999;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .modelo-img.error + .modelo-placeholder,
+        .modelo-img[style*="display: none"] + .modelo-placeholder {
+            display: flex;
+        }
+
+        .modelo-img {
+            width: 100%;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            background: transparent;
+            border-radius: 4px;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+
+        .modelo-codigo {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 1.1rem;
+        }
+
+        .modelo-desc {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+            margin-top: 2px;
+        }
+
+        /* Selector de Acabados */
+        .acabados-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .acabado-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .acabado-item:hover {
+            border-color: var(--color-secondary);
+        }
+
+        .acabado-muestra {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .acabado-item.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+        }
+
+        .acabado-info {
+            width: 100%;
+        }
+
+        .acabado-nombre {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+
+        /* Formulario de Dimensiones */
+                .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            /* Sin flechas spinner */
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+        }
+
+                /* Panel de Resumen */
+        .resumen-panel {
+            position: sticky;
+            top: 92px;
+            height: fit-content;
+        }
+
+        .resumen-card {
+            background: var(--color-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .resumen-title {
+            font-size: 1.3rem;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .resumen-item:last-child {
+            border-bottom: none;
+        }
+
+        .resumen-label {
+            color: var(--color-text-light);
+        }
+
+        .resumen-value {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+                                        .btn-calcular {
+            width: 100%;
+            padding: 15px;
+            background: #4a5b7a;
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-calcular:hover {
+            background: #5a6ea8;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-calcular:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Visualización de la Vitrina */
+        .preview-vitrina {
+            /*background: #f8f9fa;   */
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 50px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+        }
+
+        .vitrina-preview-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+                /* Estados de validación */
+                                /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .acabados-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .opciones-adicionales {
+            margin-top: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+            color: var(--color-text);
+            position: relative;
+            padding-left: 30px;
+            min-height: 24px;
+        }
+
+        .checkbox-item input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkmark {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover .checkmark {
+            border-color: var(--color-secondary);
+        }
+
+        .checkbox-item input:checked ~ .checkmark {
+            background: var(--color-secondary);
+            border-color: var(--color-secondary);
+        }
+
+        .checkmark::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-item input:checked ~ .checkmark::after {
+            display: block;
+        }
+
+        select:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        label.disabled {
+            color: #999;
+            opacity: 0.6;
+        }
+
+        .checkbox-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .checkbox-item.disabled .checkmark {
+            background: #e0e0e0;
+            border-color: #ccc;
+        }
+
+        label.active-label {
+            color: var(--color-primary);
+            opacity: 1;
+        }
+
+        /* Tabla de medidas estilo Excel */
+        .medidas-container {
+            border: 2px solid #999;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .medidas-titulo {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .medidas-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .medidas-header {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .medidas-header.real-fabricar {
+            color: #2D3A4B;
+        }
+
+        .medidas-label {
+            font-size: 0.9rem;
+            color: #333;
+            text-align: right;
+            padding-right: 10px;
+            padding-top: 8px;
+        }
+
+        .medidas-input input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .medidas-input input:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+        }
+
+        .medidas-input.real-fabricar input.readonly {
+            background: #fffbdf;
+            border-color: #ddd;
+            color: #333;
+            font-weight: 600;
+        }
+
+        #bisagrasLabel.disabled {
+            color: #999;
+            opacity: 0.6;
+        }
+
+                .bisagras-widget {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background: #f9f9f9;
+            min-height: 48px;
+        }
+
+        .bisagras-widget.activo {
+            background: white;
+            border-color: #ccc;
+        }
+
+        .bisagras-widget.deshabilitado {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .adjuntar-bisagras-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .adjuntar-bisagras-group.deshabilitado {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .adjuntar-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text, #2D3A4B);
+        }
+        .sino-toggle {
+            display: inline-flex;
+            border: 1.5px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .sino-btn {
+            border: none;
+            background: white;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+            transition: background .15s, color .15s;
+        }
+        .sino-btn + .sino-btn {
+            border-left: 1.5px solid #ccc;
+        }
+        .sino-btn:hover {
+            background: var(--hover-bg, #f0f0f0);
+        }
+        .sino-btn.activo-si {
+            background: #2e7d32;
+            color: white;
+        }
+        .sino-btn.activo-no {
+            background: #c0392b;
+            color: white;
+        }
+
+        .bisagras-nominal-info {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--color-text-light);
+            line-height: 1.2;
+        }
+
+        .bisagras-nominal-info.activo {
+            color: var(--color-text);
+        }
+
+        .bisagras-counter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bisagras-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: var(--color-text-light);
+            line-height: 1;
+        }
+
+        .bisagras-btn:hover:not(:disabled) {
+            border-color: var(--color-secondary);
+            color: var(--color-secondary);
+            background: #ebf5fb;
+        }
+
+        .bisagras-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .bisagras-num {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            min-width: 26px;
+            text-align: center;
+        }
+
+        .bisagras-num.inactivo {
+            color: #ccc;
+            font-size: 1rem;
+        }
+
+                .bisagras-mecanizado-precio {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--color-secondary);
+            font-weight: 600;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .opciones-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        /* Fila de vidrio: combo (izq) siempre a mitad, campo especial (der) aparece/desaparece sin mover el layout */
+        .vidrio-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        @media (max-width: 600px) {
+            .medidas-grid {
+                grid-template-columns: 80px 1fr 1fr 1fr;
+                gap: 5px;
+            }
+            
+            .medidas-header {
+                font-size: 0.75rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .vidrio-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preview-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .resumen-content {
+            margin: 20px 0;
+        }
+
+        .datos-pedido {
+            margin: 16px 0 4px;
+            padding-top: 14px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .datos-pedido .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .datos-pedido label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .datos-pedido label .opcional {
+            font-weight: 400;
+            color: var(--color-text-light);
+        }
+
+        .datos-pedido input,
+        .datos-pedido textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .datos-pedido input:focus,
+        .datos-pedido textarea:focus {
+            border-color: var(--color-secondary);
+        }
+
+        .datos-pedido textarea {
+            resize: vertical;
+            min-height: 56px;
+        }
+
+        .nota-contador {
+            align-self: flex-end;
+            font-size: 0.7rem;
+            color: var(--color-text-light);
+        }
+
+        .bisagras-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+                .btn-reset {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: transparent;
+            color: var(--color-text-light);
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+                .resumen-item.completo .resumen-value {
+            color: var(--color-primary);
+        }
+
+        .medidas-input input.valido {
+            border-color: #27ae60;
+            background-color: #f0fff0;
+        }
+
+        .medidas-input input.advertencia {
+            border-color: #f39c12;
+            background-color: #fffbf0;
+        }
+
+        .medidas-input input.error {
+            border-color: var(--color-accent);
+            background-color: #fff0f0;
+        }
+        
+        .medidas-input input.bloqueado {
+            border-color: var(--color-accent);
+            background-color: #ffe0e0;
+            font-weight: 600;
+        }
+
+        .medidas-input {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .medidas-mensaje {
+            min-height: 16px;
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .medidas-mensaje.valido {
+            color: #27ae60;
+        }
+
+        .medidas-mensaje.advertencia {
+            color: #f39c12;
+        }
+
+        .medidas-mensaje.error {
+            color: var(--color-accent);
+        }
+        
+        .medidas-mensaje.info {
+            color: #27ae60;
+            font-style: italic;
+        }
+        
+        /* Aviso bajo la casilla de tirador: explica por qué está deshabilitada
+           (perfil sin tirador, o medidas insuficientes). Vacío = oculto. */
+        .tirador-aviso {
+            margin: 4px 0 0 30px;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            color: #f39c12;
+        }
+        .tirador-aviso:empty { display: none; }
+
+        /* Selector de Tiradores */
+        .tiradores-selector {
+            display: none;
+            margin-top: 12px;
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .tiradores-selector.visible {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .tiradores-titulo {
+            font-size: 0.85rem;
+            color: var(--color-text);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .tiradores-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .tirador-card {
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .tirador-card:hover {
+            border-color: var(--color-secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .tirador-card.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .tirador-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--color-secondary);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+        
+        .tirador-img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            background: transparent;
+            border-radius: 4px;
+            padding: 3px;
+        }
+        
+        .tirador-nombre {
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        
+                
+                
+        @media (max-width: 600px) {
+            .tiradores-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tiradores-selector {
+                margin-left: 0;
+            }
+        }
+
+        /* Botón volver al menú — mismo diseño que el resto de pantallas */
+        #cab-btn.btn-grad {
+            min-width: 115px;
+            padding: 9px 16px;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            color: #fff;
+            background: #4a5b7a;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #cab-btn.btn-grad:hover {
+            background: #5a6ea8;
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 600px) {
+            #cab-btn.btn-grad {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+                min-width: 0;
+            }
+        }
+
+        /* ==========================================
+           VISTA DE FABRICACIÓN (pantalla completa)
+           ========================================== */
+        #fabVista {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--color-bg);
+        }
+        .fab-topbar {
+            background: #2D3A4B;
+            color: #fff;
+            height: 72px;
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .fab-topbar .fab-barra-logo { height: 46px; width: auto; }
+        .fab-topbar h2 {
+            flex: 1;
+            font-size: 1.05rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            margin: 0;
+            text-align: center;
+        }
+        .fab-btn-volver,
+        .fab-btn-pdf-top {
+            min-width: 115px;
+            padding: 9px 16px;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            color: #fff;
+            background: #4a5b7a;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .fab-btn-volver:hover,
+        .fab-btn-pdf-top:hover {
+            background: #5a6ea8;
+            transform: translateX(2px);
+        }
+        .fab-btn-pdf-top:disabled {
+            background: #9aa3b2;
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        .fab-btn-pdf-top:disabled:hover {
+            background: #9aa3b2;
+            transform: none;
+        }
+        .fab-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        /* --- Columna izquierda --- */
+        .fab-col-izq {
+            width: 285px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 16px 16px;
+        }
+        .fab-ficha {
+            background: var(--color-bg);
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border: 1px solid #e8e8e8;
+        }
+        /* --- Columna central: bisagras --- */
+        .fab-col-bisagras {
+            width: 285px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 16px 16px;
+        }
+        .fab-bis-noadj {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+            font-style: italic;
+            padding: 6px 0;
+        }
+        .fab-bis-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .fab-bis-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fab-bis-card:hover { border-color: var(--color-secondary); }
+        .fab-bis-card.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            color: var(--color-secondary);
+        }
+        .fab-bis-card img {
+            width: 46px; height: 46px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .fab-bis-card-nombre { font-size: 0.8rem; font-weight: 500; }
+        .fab-bis-card.selected .fab-bis-card-nombre { font-weight: 700; }
+        .fab-bis-base-img {
+            width: 100%;
+            max-width: 180px;
+            display: block;
+            margin: 4px auto 10px;
+        }
+        .fab-bis-toggle {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 16px;
+        }
+        .fab-bis-toggle button {
+            flex: 1;
+            padding: 8px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--color-text);
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .fab-bis-toggle button:hover { border-color: var(--color-secondary); }
+        .fab-bis-toggle button.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            color: var(--color-secondary);
+            font-weight: 700;
+        }
+        /* Botón zoom junto al título de montaje */
+        .fab-bis-titulo-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 7px;
+        }
+        .fab-bis-zoom {
+            border: 1px solid var(--color-secondary);
+            background: white;
+            color: var(--color-secondary);
+            border-radius: 5px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fab-bis-zoom:hover { background: #ebf5fb; }
+        /* Popup zoom imágenes montaje */
+        .fab-bis-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .fab-bis-modal {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            max-width: 90vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .fab-bis-modal-titulo {
+            font-size: 1.4rem;
+            color: var(--color-primary);
+            margin: 0 0 16px;
+            text-align: center;
+        }
+        .fab-bis-modal-imgs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .fab-bis-modal-item { text-align: center; }
+        .fab-bis-modal-item img {
+            width: 220px;
+            height: 220px;
+            object-fit: contain;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .fab-bis-modal-item span {
+            display: block;
+            margin-top: 8px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        .fab-bis-modal-cerrar {
+            display: block;
+            margin: 18px auto 0;
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+            background: var(--color-secondary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .fab-ficha-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 2px 0;
+            font-size: 0.8rem;
+            gap: 8px;
+        }
+        .fab-ficha-fila span { color: var(--color-text-light); flex-shrink: 0; }
+        .fab-ficha-fila strong { color: var(--color-primary); text-align: right; font-size: 0.8rem; }
+        .fab-grupo-label {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--color-text-light);
+            margin-bottom: 7px;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .fab-hint {
+            font-weight: normal;
+            text-transform: none;
+            color: var(--color-text-light);
+            letter-spacing: 0;
+            font-size: 0.75rem;
+        }
+        .fab-separador { height: 1px; background: #ececec; margin: 10px 0; }
+
+        /* Grupo: label + input en la misma fila */
+        .fab-input-grupo { margin-bottom: 6px; }
+        .fab-input-grupo label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        .fab-input-grupo label .fab-hint {
+            flex: 1;
+            font-weight: normal;
+        }
+
+        /* Fila input + "mm" alineados a la derecha dentro del label */
+        .fab-mm-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .fab-mm-row input {
+            width: 68px;
+            padding: 4px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            text-align: right;
+            transition: border-color 0.2s;
+            /* Quitar flechas spinner en todos los navegadores */
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .fab-mm-row input::-webkit-outer-spin-button,
+        .fab-mm-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .fab-mm-row input:focus { outline: none; border-color: var(--color-secondary); }
+        .fab-mm-row input[readonly] { background: #fffbdf; border-color: #ddd; color: #555; }
+        .fab-mm-row input.fab-err   { border-color: var(--color-accent); background: #fff0f0; }
+        .fab-mm-row span { color: var(--color-text-light); font-size: 0.78rem; }
+        .fab-warn { display: none; font-size: 0.72rem; color: var(--color-accent); margin-top: 1px; }
+        .fab-warn.visible { display: block; }
+        /* Mano */
+        .fab-mano-btns { display: flex; gap: 7px; margin-bottom: 4px; }
+        .fab-mano-btn {
+            flex: 1;
+            padding: 8px 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--color-text);
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .fab-mano-btn:hover { border-color: var(--color-secondary); }
+        .fab-mano-btn.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            color: var(--color-secondary);
+            font-weight: 700;
+        }
+        /* Posición tirador */
+        .fab-pos-btns { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+        .fab-pos-btn {
+            padding: 6px 11px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .fab-pos-btn:hover { border-color: var(--color-secondary); }
+        .fab-pos-btn.selected {
+            border-color: var(--color-secondary);
+            background: #ebf5fb;
+            color: var(--color-secondary);
+            font-weight: 700;
+        }
+        /* --- Columna derecha (SVGs) --- */
+        .fab-col-der {
+            flex: 1;
+            display: flex;
+            gap: 14px;
+            overflow: hidden;
+            padding: 14px;
+        }
+        .fab-svg-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        .fab-svg-titulo {
+            background: var(--color-bg);
+            border-bottom: 1px solid #e0e0e0;
+            padding: 7px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+        .fab-svg-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 6px;
+        }
+        .fab-svg-content svg { max-height: 100%; max-width: 100%; }
+
+        /* ═══════════════════════════════════════════
+           INFORME PRESUPUESTO — HOJA A4 (lenguaje ecosistema)
+        ═══════════════════════════════════════════ */
+
+        /* Barra fija de acciones (banda oscura superior) */
+        #presu-barra {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: #2D3A4B;
+            height: 72px; padding: 0 28px;
+            align-items: center; gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        #presu-barra.visible { display: flex; }
+        #presu-barra .barra-logo { height: 46px; width: auto; }
+        #presu-barra .presu-barra-titulo {
+            flex: 1;
+            text-align: center;
+            font-size: 1.05rem; font-weight: 500;
+            color: #fff; letter-spacing: 0.06em;
+        }
+        #presu-barra button {
+            min-width: 115px; padding: 9px 16px;
+            font-size: 0.85rem;
+            color: #fff; background: #4a5b7a; border: none; border-radius: 4px;
+            cursor: pointer; transition: background 0.2s ease, transform 0.2s ease;
+            letter-spacing: 0.03em;
+        }
+        #presu-barra button:hover { background: #5a6ea8; transform: translateX(2px); }
+
+        body.informe-activo { background: #e4e5e3; }
+
+        /* Hoja A4 */
+        #presuVista {
+            display: none;
+            padding: 90px 0 40px;   /* deja hueco para la barra fija */
+        }
+        #presu-informe-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 18mm 16mm;
+            box-sizing: border-box;
+            background: #ffffff;
+            box-shadow: 0 3px 16px rgba(0,0,0,0.18);
+            color: #222;
+        }
+
+        /* Cabecera del informe */
+        .informe-header { border-bottom: 2px solid #2D3A4B; padding-bottom: 12px; margin-bottom: 16px; }
+        .informe-header-top { display: flex; align-items: center; gap: 16px; }
+        .informe-header-logo { height: 48px; width: auto; flex-shrink: 0; }
+        .informe-header h1 {
+            flex: 1; margin: 0; text-align: center;
+            font-weight: 600;
+            font-size: 18px; letter-spacing: 0.5px; text-transform: uppercase;
+            color: #2D3A4B; line-height: 1.2;
+        }
+        .informe-fecha { font-size: 11px; color: #888; white-space: nowrap; }
+
+        /* Bloques */
+        .bloque-titulo {
+            background: #d7d8d6; border: 1.5px solid #b7b8b6;
+            padding: 6px 16px; border-radius: 4px;
+            font-weight: 600; font-size: 12px; letter-spacing: 0.06em;
+            text-transform: uppercase; color: #333;
+            margin: 16px 0 10px;
+        }
+
+        /* Parámetros — dos columnas: imagen del perfil + datos línea a línea */
+        .presu-params-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        .presu-params-img {
+            display: flex; align-items: flex-start; justify-content: center;
+            padding-top: 4px;
+        }
+        .presu-params-img img {
+            max-width: 100%; max-height: 260px; width: auto; height: auto;
+            border: 1px solid #ddd; border-radius: 4px; background: #fff;
+        }
+        .presu-params-img .preview-placeholder {
+            font-size: 11px; color: #999; font-style: italic;
+        }
+        @media (max-width: 800px) {
+            .presu-params-grid { grid-template-columns: 1fr; }
+            .presu-params-img { display: none; }
+        }
+
+        .informe-aviso-templado {
+            margin: 14px 0 0;
+            padding: 8px 14px;
+            background: #fff8e6;
+            border: 1px solid #e6c65c;
+            border-radius: 4px;
+            font-size: 12px; font-weight: 600; color: #7a5c00;
+            letter-spacing: 0.02em;
+        }
+
+        /* Importar configuración — mismo peso visual que Resetear, sin competir
+           con el botón principal. */
+        .btn-importar {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: #fff;
+            color: var(--color-primary);
+            border: 2px dashed #c3ccd8;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem; font-weight: 600; font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn-importar:hover { background: #f2f6fb; border-color: var(--color-secondary); }
+
+        /* Banda de configuración importada (solo lectura) */
+        #fabBandaImportado {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+            padding: 8px 16px;
+            background: #fff4d6;
+            border-bottom: 1px solid #e3c55e;
+        }
+        .fab-imp-aviso {
+            font-size: 0.85rem; font-weight: 700; color: #7a5c00;
+            display: flex; flex-direction: column; gap: 1px;
+        }
+        .fab-imp-origen { font-weight: 400; font-size: 0.75rem; color: #8a6d10; }
+        .fab-imp-campos {
+            display: flex; align-items: flex-end; gap: 12px;
+            margin-left: auto; flex: 1 1 460px; max-width: 620px;
+        }
+        .fab-imp-campos label {
+            display: flex; flex-direction: column; gap: 3px; flex: 1 1 0;
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.03em; color: #7a5c00;
+        }
+        .fab-imp-campos input {
+            width: 100%; height: 38px;
+            padding: 0 10px; border: 1px solid #d3b74e; border-radius: 4px;
+            font-size: 0.9rem; font-family: inherit; background: #fff;
+        }
+        .fab-imp-campos input:focus { outline: 2px solid #d3b74e; outline-offset: -1px; }
+        /* Mismo aspecto que Presupuesto y Generar PDF: es una acción de barra,
+           no un campo. La altura se fija a mano (no se deja al cálculo del
+           navegador) para que coincida exactamente con la de los inputs. */
+        /* El botón vive dentro de un label igual que los campos, con un hueco
+           en blanco donde ellos llevan su etiqueta. Así los tres bloques tienen
+           la misma estructura y la alineación no depende del cálculo del flex. */
+        .fab-imp-campos label.fab-imp-accion { flex: 0 0 auto; }
+
+        .fab-imp-salir {
+            height: 38px; min-width: 115px;
+            padding: 0 16px;
+            font-size: 0.85rem; font-family: inherit;
+            letter-spacing: 0.03em;
+            color: #fff; background: #4a5b7a;
+            border: none; border-radius: 4px;
+            cursor: pointer; white-space: nowrap;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .fab-imp-salir:hover { background: #5a6ea8; transform: translateX(2px); }
+        /* Atenuación de los controles bloqueados: el disabled lo pone el JS,
+           esto solo lo hace evidente de un vistazo. */
+        .fab-importado #fabInputs,
+        .fab-importado #fabBisagras { opacity: 0.72; }
+
+        /* Observaciones de cabecera — bloque propio, entre parámetros y aviso.
+           No va en el grid de artículos: acompaña al documento, no define la vitrina. */
+        .informe-nota {
+            margin: 12px 0 0;
+            padding: 8px 12px;
+            background: #f7f9fc;
+            border: 1px solid #cbd5e1;
+            border-left: 3px solid #2D3A4B;
+            border-radius: 4px;
+            font-size: 12px; line-height: 1.35;
+        }
+        .informe-nota .nota-label {
+            display: block;
+            font-weight: bold; color: #2D3A4B;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 3px;
+        }
+        /* Copiable con un clic, igual que las celdas de la tabla. */
+        .informe-nota [data-copia] {
+            display: block; cursor: pointer; position: relative;
+            padding: 2px 20px 2px 2px;
+            white-space: pre-wrap;
+            transition: background 0.12s ease;
+        }
+        .informe-nota [data-copia]:hover { background: #dbe7f3; }
+        .informe-nota [data-copia]:hover::after {
+            content: '📋'; position: absolute; right: 4px; top: 2px;
+            font-size: 10px; opacity: 0.45; pointer-events: none;
+        }
+        .informe-nota [data-copia].copiada { background: #cfe6cf; }
+        .informe-nota [data-copia].copiada::after { content: '✓'; opacity: 0.8; }
+
+        /* Parámetros — etiqueta izq / valor der */
+        .informe-params { display: flex; flex-direction: column; gap: 0; padding: 0 4px; }
+                                .campo-informe {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 1.5px 2px; line-height: 1.15;
+            border-bottom: 1px dotted #bbb;
+        }
+        .campo-informe label {
+            font-weight: bold; font-size: 12px; color: #555;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .campo-informe .valor {
+            font-size: 13px; font-weight: 300; color: #222; text-align: right;
+        }
+
+        /* Tabla de artículos (estilo ecosistema) */
+        .tabla-informe { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .tabla-informe th, .tabla-informe td {
+            border: 1px solid #333; padding: 6px 10px; font-size: 12px;
+        }
+        .tabla-informe th {
+            background: #ddd; font-weight: bold; text-align: left;
+            letter-spacing: 0.04em;
+        }
+        .tabla-informe td.cod { font-weight: 600; white-space: nowrap; }
+        .tabla-informe th.num, .tabla-informe td.num { text-align: right; }
+        .tabla-informe .incluido { color: #999; font-style: italic; }
+
+        /* Insignia "Dto 100%": marca las líneas incluidas en el precio de la
+           vitrina (bisagras KABI/HAVA, tarifa 0). Informativa: el descuento
+           real se aplica en Odoo, no aquí. La genera presupuesto.js. */
+        .tabla-informe .dto-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            background: #e8eef7;
+            color: #2D3A4B;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .tabla-informe .obs td { font-style: italic; color: #555; }
+
+        /* Celdas copiables: se resaltan al pasar el ratón; un clic copia. */
+        .tabla-informe td[data-copia] {
+            cursor: pointer; position: relative;
+            transition: background 0.12s ease;
+        }
+        .tabla-informe td[data-copia]:hover { background: #dbe7f3; }
+        .tabla-informe td[data-copia]:hover::after {
+            content: '📋'; position: absolute; right: 5px; top: 50%;
+            transform: translateY(-50%); font-size: 10px; opacity: 0.45;
+            pointer-events: none;
+        }
+        .tabla-informe td[data-copia].copiada { background: #cfe6cf; }
+        .tabla-informe td[data-copia].copiada::after { content: '✓'; opacity: 0.8; }
+
+        .tabla-informe tfoot td {
+            border: none; border-top: 2px solid #2D3A4B;
+            font-weight: bold; font-size: 14px; padding-top: 12px;
+        }
+        .tabla-informe tfoot td.aviso-copia {
+            text-align: left; font-weight: 400; font-style: italic;
+            font-size: 12.5px; color: #777;
+        }
+
+        .informe-consultar-motivo {
+            margin-top: 14px; font-size: 12px; font-style: italic; color: #b7791f;
+        }
+        .informe-version { margin-top: 18px; text-align: right; font-size: 9px; color: #aaa; }
+
+        /* Forzar colores en PDF/impresión */
+        #presu-informe-container * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @media (max-width: 800px) {
+            #presu-informe-container { width: 100%; min-height: 0; padding: 24px 18px; }
+        }
+
+        /* Botón de ayuda (?) y popover — patrón compartido del ecosistema */
+        .btn-help {
+            width: 20px; height: 16px; border-radius: 50%;
+            border: 1.5px solid #c4b5fd; background: #f5f3ff;
+            color: #702dee; font-size: 11px; font-weight: 700;
+            cursor: pointer; flex-shrink: 0; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; margin-top: 2px;
+        }
+        .btn-help:hover { background: #ede9fe; }
+        #help-popover {
+            position: fixed; z-index: 200;
+            background: #f0fdf4; border: 2px solid #bbf7d0;
+            border-radius: 10px; padding: 12px 14px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.45);
+            max-width: 440px; font-size: 14px; color: #374151; line-height: 1.6;
+            display: none; opacity: 0; transition: opacity 0.15s;
+        }
+        #help-popover.visible { display: block; opacity: 1; }
+        #help-popover::before {
+            content: ''; position: absolute; top: -6px; left: 18px;
+            width: 10px; height: 10px; background: #f0fdf4;
+            border-left: 1px solid #bbf7d0; border-top: 1px solid #bbf7d0;
+            transform: rotate(45deg);
+        }
+        #help-popover strong { color: #111; font-weight: 600; }
+    </style>
+</head>
+
+<body>
+
+<!-- Popover de ayuda (?) — reglas de cotas de bisagras -->
+<div id="help-popover">
+    <strong>●  B1 y B2</strong> (distancia al extremo superior e inferior): mínimo 70 mm, por defecto 100 mm.<br><br>
+    <strong>●  C</strong> (separación entre bisagras): mínimo 80 mm cada hueco.<br><br>
+    <strong>●  </strong>El nº de bisagras viene calculado del anterior formulario según la altura.<br><br>
+    <strong>●  </strong>Si alguna cota queda en <strong>rojo</strong>, ajusta B1/B2 o reparte los C hasta que todas lleguen al mínimo.<br><br>
+    <strong>●  </strong>El último valor C (en amarillo) no es editable: es el resultado final tras repartir el resto de medidas.<br><br>
+    <strong>●  </strong><em>No se puede generar el PDF ni el presupuesto mientras haya cotas por debajo del mínimo.</em>
+</div>
+
+    <header id="mainHeader">
+        <div class="container">
+            <div class="header-content">
+                <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/LogoAdinorBlanco.png" 
+                    alt="Adinor Logo" 
+                    class="header-logo">
+                <h1>Configurador de Vitrinas de Aluminio <span class="app-version" id="appVersionHeader"></span></h1>
+                <button id="cab-btn" class="btn-grad" onclick="volverAlMenu()">← Volver al menú</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" id="mainContainer">
+        <div class="main-grid">
+            
+            <!-- Panel Izquierdo: Configuración -->
+            <div class="config-panel">
+                
+                <!-- Sección 1: Selección de Modelo -->
+                <div class="section-card">
+                    <h2 class="section-title">1. Selecciona el Modelo de Perfil</h2>
+                    <div class="modelos-grid" id="modelosContainer">
+                        <div class="modelo-card" data-modelo="7991">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7991_cotas.jpg" 
+                                alt="Modelo 7991" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7991</div>
+                            <div class="modelo-codigo">7991</div>
+                            <div class="modelo-desc">20x45 P8</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7994">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7994_cotas.jpg" 
+                                alt="Modelo 7994" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7994</div>
+                            <div class="modelo-codigo">7994</div>
+                            <div class="modelo-desc">20x45 P4</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7995">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7995_cotas.jpg" 
+                                alt="Modelo 7995" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7995</div>
+                            <div class="modelo-codigo">7995</div>
+                            <div class="modelo-desc">35x45 P8</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7990">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7990_cotas.jpg" 
+                                alt="Modelo 7990" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7990</div>
+                            <div class="modelo-codigo">7990</div>
+                            <div class="modelo-desc">20x45 P20</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7998">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7998_cotas.jpg" 
+                                alt="Modelo 7998" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7998</div>
+                            <div class="modelo-codigo">7998</div>
+                            <div class="modelo-desc">20x45 P45</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7993">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7993_cotas.jpg" 
+                                alt="Modelo 7993" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7993</div>
+                            <div class="modelo-codigo">7993</div>
+                            <div class="modelo-desc">19x21</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7996">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7996_cotas.jpg" 
+                                alt="Modelo 7996" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7996</div>
+                            <div class="modelo-codigo">7996</div>
+                            <div class="modelo-desc">20x18 P8</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="7999">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/7999_cotas.jpg" 
+                                alt="Modelo 7999" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">7999</div>
+                            <div class="modelo-codigo">7999</div>
+                            <div class="modelo-desc">16x60 S/P</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="79916">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/79916_cotas.jpg" 
+                                alt="Modelo 79916" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">79916</div>
+                            <div class="modelo-codigo">79916</div>
+                            <div class="modelo-desc">20x56 C/P</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="BT100">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/BT100_cotas.jpg" 
+                                alt="Modelo BT100" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">BT100</div>
+                            <div class="modelo-codigo">BT100</div>
+                            <div class="modelo-desc">Perfil BT-10</div>
+                        </div>
+                        
+                        <div class="modelo-card" data-modelo="BT110">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/BT110_cotas.jpg" 
+                                alt="Modelo BT110" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">BT110</div>
+                            <div class="modelo-codigo">BT110</div>
+                            <div class="modelo-desc">Perfil BT-60</div>
+                        </div>
+
+                        <div class="modelo-card" data-modelo="KABI">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/Kabi_cotas.jpg" 
+                                alt="Modelo KABI" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">KABI</div>
+                            <div class="modelo-codigo">KABI</div>
+                            <div class="modelo-desc">Perfiles KABI</div>
+                        </div>
+
+                        <div class="modelo-card" data-modelo="HAVA">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/Hava_cotas.jpg" 
+                                alt="Modelo HAVA" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">HAVA</div>
+                            <div class="modelo-codigo">HAVA</div>
+                            <div class="modelo-desc">Perfiles HAVA</div>
+                        </div>
+
+                        <div class="modelo-card" data-modelo="HAVASP">
+                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/HavaSP_cotas.jpg" 
+                                alt="Modelo HAVASP" 
+                                class="modelo-img"
+                                onerror="this.style.display='none'">
+                            <div class="modelo-placeholder">HAVA S/P</div>
+                            <div class="modelo-codigo">HAVA S/P</div>
+                            <div class="modelo-desc">Perfiles HAVA S/P</div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+
+                <!-- Sección 2: Selección de Acabado -->
+                <div class="section-card">
+                    <h2 class="section-title">2. Selecciona el Acabado</h2>
+                    <div class="acabados-list" id="acabadosContainer">
+                        <div class="acabado-item" data-acabado="PM">
+                            <div class="acabado-muestra" style="background: linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 100%);"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Plata Mate (A.PM)</div>
+                            </div>
+                        </div>
+                        <div class="acabado-item" data-acabado="P">
+                            <div class="acabado-muestra" style="background: linear-gradient(135deg, #E8E8E8 0%, #FFFFFF 50%, #E8E8E8 100%);"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Plata Brillo (A.P)</div>
+                            </div>
+                        </div>
+                        <div class="acabado-item" data-acabado="B">
+                            <div class="acabado-muestra" style="background: linear-gradient(135deg, #FFFFFF 0%, #f0f0f0 40%, #FFFFFF 60%, #e8e8e8 100%); border: 1px solid #ddd;"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Lacado Blanco Brillo (L.B)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="BM03">
+                            <div class="acabado-muestra" style="background: radial-gradient(ellipse at 38% 35%, #ffffff 0%, #f2f2f0 45%, #e4e4e2 100%); border: 1px solid #ddd;"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Blanco Mate 9003 (L.BM03)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="NM">
+                            <div class="acabado-muestra" style="background: #1a1a1a;"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Lacado Negro Mate (L.NM)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="BR">
+                            <div class="acabado-muestra" style="background: #8b6914;"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Bronce Cepillado (A.BR)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="RB">
+                            <div class="acabado-muestra" style="
+                                background:
+                                    repeating-linear-gradient(92deg,
+                                        rgba(255,255,255,0.0) 0px,
+                                        rgba(255,255,255,0.22) 1.5px,
+                                        rgba(0,0,0,0.12) 3px,
+                                        rgba(255,255,255,0.0) 5px,
+                                        rgba(0,0,0,0.15) 7px,
+                                        rgba(255,255,255,0.18) 8.5px,
+                                        rgba(255,255,255,0.0) 10px,
+                                        rgba(0,0,0,0.08) 13px,
+                                        rgba(255,255,255,0.0) 15px,
+                                        rgba(255,255,255,0.20) 17px,
+                                        rgba(0,0,0,0.13) 19px,
+                                        rgba(255,255,255,0.0) 22px
+                                    ),
+                                    linear-gradient(168deg, #e8b030 0%, #c38d05 35%, #9a6e03 70%, #7a5202 100%);
+                            "></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Chapa Roble (C.RB)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="NG">
+                            <div class="acabado-muestra" style="
+                                background:
+                                    repeating-linear-gradient(90deg,
+                                        rgba(255,255,255,0.0) 0px,
+                                        rgba(255,255,255,0.18) 1.5px,
+                                        rgba(0,0,0,0.18) 3px,
+                                        rgba(255,255,255,0.0) 5px,
+                                        rgba(0,0,0,0.20) 8px,
+                                        rgba(255,255,255,0.14) 9.5px,
+                                        rgba(255,255,255,0.0) 12px,
+                                        rgba(0,0,0,0.12) 15px,
+                                        rgba(255,255,255,0.16) 17px,
+                                        rgba(255,255,255,0.0) 20px,
+                                        rgba(0,0,0,0.16) 23px,
+                                        rgba(255,255,255,0.0) 26px
+                                    ),
+                                    linear-gradient(168deg, #6b3a10 0%, #3b2301 40%, #261500 75%, #180d00 100%);
+                            "></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Chapa Nogal (C.NG)</div>
+                            </div>
+                        </div>
+
+                        <div class="acabado-item" data-acabado="ESP">
+                            <div class="acabado-muestra" style="background: #188b14;"></div>
+                            <div class="acabado-info">
+                                <div class="acabado-nombre">Especial</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Campo texto para acabado especial (solo visible si ESP seleccionado) -->
+                    <div class="form-group especial-group" id="acabadoEspecialGroup" style="display: none; margin-top: 15px;">
+                        <label for="acabadoEspecial">Especifica el acabado especial</label>
+                        <input type="text" id="acabadoEspecial" name="acabadoEspecial"
+                               placeholder="Ej.: RAL 7016 texturado, anodizado oro..." autocomplete="off" maxlength="80">
+                    </div>
+                </div>
+
+                <!-- Sección 3: Dimensiones y cantidades -->
+                <div class="section-card">
+                    <h2 class="section-title">3. Dimensiones y cantidades</h2>
+
+                    <!-- Tabla de medidas estilo Excel -->
+                    <div class="medidas-container">
+                        <h3 class="medidas-titulo">Medidas en milímetros (mm)</h3>
+                        
+                        <div class="medidas-grid">
+                            <!-- Cabeceras -->
+                            <div class="medidas-header"></div>
+                            <div class="medidas-header">Módulo</div>
+                            <div class="medidas-header">Descuentos</div>
+                            <div class="medidas-header real-fabricar">Real a fabricar</div>
+                            
+                            <!-- Fila Altura -->
+                            <div class="medidas-label">Altura puerta</div>
+                            <div class="medidas-input">
+                                <input type="number" id="alturaModulo" name="alturaModulo" autocomplete="off" placeholder="Ej: 910" onkeydown="if(event.key==='Enter')this.blur()">
+                            </div>
+                            <div class="medidas-input">
+                                <input type="number" id="alturaDescuento" name="alturaDescuento" autocomplete="off" value="2" min="0" onkeydown="if(event.key==='Enter')this.blur()">
+                            </div>
+                            <div class="medidas-input real-fabricar">
+                                <input type="number" id="alturaReal" name="alturaReal" class="readonly" autocomplete="off" onkeydown="if(event.key==='Enter')this.blur()">
+                                <span class="medidas-mensaje" id="alturaMensaje"></span>
+                            </div>
+                            
+                            <!-- Fila Anchura -->
+                            <div class="medidas-label">Ancho puerta</div>
+                            <div class="medidas-input">
+                                <input type="number" id="anchoModulo" name="anchoModulo" autocomplete="off" placeholder="Ej: 286" onkeydown="if(event.key==='Enter')this.blur()">
+                            </div>
+                            <div class="medidas-input">
+                                <input type="number" id="anchoDescuento" name="anchoDescuento" autocomplete="off" value="2" min="0" onkeydown="if(event.key==='Enter')this.blur()">
+                            </div>
+                            <div class="medidas-input real-fabricar">
+                                <input type="number" id="anchoReal" name="anchoReal" class="readonly" autocomplete="off" onkeydown="if(event.key==='Enter')this.blur()">
+                                <span class="medidas-mensaje" id="anchoMensaje"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bisagras y cantidad -->
+                    <div class="opciones-form">
+                        <div style="display:flex; gap:28px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
+                            <label class="checkbox-item" style="margin-bottom:0">
+                                <input type="checkbox" id="sinMecanizado" name="sinMecanizado">
+                                <span class="checkmark"></span>
+                                Sin mecanizado de bisagras
+                            </label>
+                            <div class="adjuntar-bisagras-group" id="adjuntarBisagrasGroup">
+                                <span class="adjuntar-label">¿Adjuntamos Bisagras?</span>
+                                <div class="sino-toggle">
+                                    <button type="button" class="sino-btn" id="adjuntarSi" data-valor="si">Sí</button>
+                                    <button type="button" class="sino-btn" id="adjuntarNo" data-valor="no">No</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label id="bisagrasLabel" class="disabled">Número de Bisagras</label>
+                                <div class="bisagras-widget" id="bisagrasWidget">
+                                    <div class="bisagras-nominal-info" id="bisagrasNominalInfo">Introduce altura real primero</div>
+                                    <div class="bisagras-counter">
+                                        <button class="bisagras-btn" id="bisagrasMenos" disabled>−</button>
+                                        <span class="bisagras-num inactivo" id="bisagrasNum">—</span>
+                                        <button class="bisagras-btn" id="bisagrasmas" disabled>+</button>
+                                    </div>
+                                </div>
+                                <span class="bisagras-mecanizado-precio" id="bisagrasMecanizadoPrecio"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cantidad">Cantidad de Vitrinas</label>
+                                <input type="number" id="cantidad" name="cantidad" min="1" value="1" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 4: Opciones adicionales -->
+                <div class="section-card">
+                    <h2 class="section-title">4. Opciones adicionales</h2>
+
+                    <div class="opciones-form">
+                        <div class="form-group full-width opciones-adicionales">
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="tirador" name="tirador">
+                                    <span class="checkmark"></span>
+                                    Tirador mecanizado
+                                </label>
+                                <p class="tirador-aviso" id="tiradorAviso"></p>
+                                
+                                <!-- Selector de tiradores -->
+                                <div class="tiradores-selector" id="tiradoresSelector">
+                                    <div class="tiradores-titulo">Selecciona el tipo de tirador:</div>
+                                    <div class="tiradores-grid">
+                                        <div class="tirador-card" data-tirador="79971">
+                                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/126x35.jpg" 
+                                                alt="Tirador 126x35" 
+                                                class="tirador-img"
+                                                onerror="this.style.display='none'">
+                                            <div class="tirador-nombre">126 × 35 mm</div>
+                                        </div>
+                                        
+                                        <div class="tirador-card" data-tirador="7997">
+                                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/37x16.jpg" 
+                                                alt="Tirador 37x16" 
+                                                class="tirador-img"
+                                                onerror="this.style.display='none'">
+                                            <div class="tirador-nombre">37 × 16 mm</div>
+                                        </div>
+
+                                        <div class="tirador-card" data-tirador="7794">
+                                            <img src="https://raw.githubusercontent.com/Jdurba/Vitrinas/main/Imagenes/48x14.jpg" 
+                                                alt="Tirador 48x14" 
+                                                class="tirador-img"
+                                                onerror="this.style.display='none'">
+                                            <div class="tirador-nombre">48 × 14 mm</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="vidrioMontado" name="vidrioMontado">
+                                    <span class="checkmark"></span>
+                                    Montada con vidrio templado de 4 mm
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Combo de color de vidrio (mitad) + campo especial (mitad derecha) -->
+                        <div class="vidrio-row" id="colorVidrioGroup">
+                            <div class="form-group">
+                                <label for="colorVidrio" id="colorVidrioLabel" class="disabled">Color del Vidrio</label>
+                                <select id="colorVidrio" name="colorVidrio" disabled>
+                                    <option value="">Selecciona color...</option>
+                                    <option value="transparente">Transparente</option>
+                                    <option value="mate">Mate</option>
+                                    <option value="bronce">Bronce</option>
+                                    <option value="gris">Gris</option>
+                                    <option value="grisoscuro">Gris oscuro</option>
+                                    <option value="especial">Especial</option>
+                                </select>
+                            </div>
+                            <div class="form-group especial-group" id="vidrioEspecialGroup" style="display: none;">
+                                <label for="vidrioEspecial">Especifica el vidrio especial</label>
+                                <input type="text" id="vidrioEspecial" name="vidrioEspecial"
+                                       placeholder="Ej.: templado 6 mm serigrafiado..." autocomplete="off" maxlength="80">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- CIERRE config-panel -->
+
+            <!-- Panel Derecho: Resumen -->
+            <div class="resumen-panel">
+                <div class="resumen-card">
+                    <h2 class="resumen-title">Resumen de Configuración</h2>
+                    
+                    <!-- Espacio reservado para futuro dibujo -->
+                    <div class="preview-vitrina" id="previewVitrina">
+                        <div class="preview-placeholder">
+                            <!--  <span>Vista previa del perfil</span>   -->
+                        </div>
+                    </div>
+
+                    <div class="resumen-content" id="resumenContent">
+                        <div class="resumen-item">
+                            <span class="resumen-label">Modelo:</span>
+                            <span class="resumen-value" id="resumenModelo">-</span>
+                        </div>
+                        
+                        <div class="resumen-item">
+                            <span class="resumen-label">Acabado:</span>
+                            <span class="resumen-value" id="resumenAcabado">-</span>
+                        </div>
+                        
+                        <div class="resumen-item">
+                            <span class="resumen-label">Dimensiones:</span>
+                            <span class="resumen-value" id="resumenDimensiones">-</span>
+                        </div>
+                        
+                        <div class="resumen-item">
+                            <span class="resumen-label">Medida vidrio:</span>
+                            <span class="resumen-value" id="resumenVidrioMedidas">-</span>
+                        </div>
+                        
+                        <div class="resumen-item">
+                            <span class="resumen-label">Cantidad:</span>
+                            <span class="resumen-value" id="resumenCantidad">-</span>
+                        </div>
+                        
+                        <div class="resumen-item">
+                            <span class="resumen-label">Mecanizado de Bisagras:</span>
+                            <div class="resumen-value bisagras-info">
+                                <span id="resumenBisagras">-</span>
+                            </div>
+                        </div>
+
+                        <div class="resumen-item">
+                            <span class="resumen-label">Adjuntamos bisagras:</span>
+                            <span class="resumen-value" id="resumenAdjuntar">-</span>
+                        </div>
+
+                        <div class="resumen-item">
+                            <span class="resumen-label">Tirador:</span>
+                            <span class="resumen-value" id="resumenTirador">No</span>
+                        </div>
+
+                        <div class="resumen-item">
+                            <span class="resumen-label">Vidrio:</span>
+                            <span class="resumen-value" id="resumenVidrio">No</span>
+                        </div>
+                    </div>
+
+                    <div class="datos-pedido">
+                        <div class="form-group">
+                            <label for="numPedido">Nº Pedido <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="numPedido" name="numPedido" placeholder="Ej: S2200" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente">Cliente / Referencia <span class="opcional">(opcional)</span></label>
+                            <input type="text" id="cliente" name="cliente" placeholder="Ej: Integrale, S.A." autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="nota">Observaciones <span class="opcional">(opcional)</span></label>
+                            <textarea id="nota" name="nota" rows="3" maxlength="250"
+                                      placeholder="Nota que acompaña al documento"></textarea>
+                            <span class="nota-contador" id="notaContador">0 / 250</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-calcular" id="btnFabricar" disabled>
+                        Siguiente →
+                    </button>
+
+                    <button class="btn-reset" id="btnReset">
+                        Resetear Datos
+                    </button>
+
+                    <button type="button" class="btn-importar" id="btnImportar">
+                        📂 Importar configuración
+                    </button>
+                    <input type="file" id="inputImportar" accept=".advit,.txt" style="display:none">
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://jdurba.github.io/General/jspdf_umd_min.js"></script>
+<script src="js/autotable_min.js?v=1"></script>
+<script src="js/config.js?v=6" defer></script>
+<script src="js/configurador.js?v=10" defer></script>
+<script src="js/fabricacion.js?v=10" defer></script>
+<script src="js/pdfVitrinas.js?v=12" defer></script>
+<script src="js/presupuesto.js?v=17" defer></script>
+<script src="js/intercambio.js?v=8" defer></script>
+
+
+<!-- ==========================================
+     VISTA DE FABRICACIÓN (pantalla completa)
+     ========================================== -->
+<div id="fabVista" style="display:none">
+
+    <!-- Barra superior (estilo ecosistema) -->
+    <div class="fab-topbar">
+        <img class="fab-barra-logo"
+             src="https://jdurba.github.io/General/img/LogoAdinorBlanco.png"
+             alt="ADINOR" />
+        <h2>Vitrinas · Hoja de fabricación <span class="app-version" id="appVersionFab"></span></h2>
+        <button class="fab-btn-volver" id="fabBtnVolver">⪡ Atrás</button>
+        <button class="fab-btn-pdf-top" id="fabBtnPresupuesto" disabled title="Selecciona las bisagras">🧾 Presupuesto</button>
+        <button class="fab-btn-pdf-top" id="fabBtnPDF" disabled title="Selecciona las bisagras">📄 Generar PDF</button>
+        <button type="button" class="fab-btn-pdf-top" id="fabBtnExportar" disabled title="Selecciona las bisagras">💾 Exportar</button>
+    </div>
+
+    <!-- Solo visible tras importar: aviso de solo lectura + los dos campos editables -->
+    <div id="fabBandaImportado" style="display:none"></div>
+
+    <!-- Layout: izquierda (inputs) + derecha (SVGs) -->
+    <div class="fab-layout">
+
+        <!-- Columna izquierda -->
+        <div class="fab-col-izq">
+            <!-- Ficha resumen (solo lectura) -->
+            <div class="fab-ficha" id="fabFicha"></div>
+
+            <!-- Inputs dinámicos (mano, B/C, tirador, Z) -->
+            <div id="fabInputs"></div>
+        </div>
+
+        <!-- Columna central: selección de bisagras (producto) -->
+        <div class="fab-col-bisagras">
+            <div id="fabBisagras"></div>
+        </div>
+
+        <!-- Columna derecha: dos SVGs -->
+        <div class="fab-col-der">
+            <div class="fab-svg-panel">
+                <div class="fab-svg-titulo">Vista Trasera — bisagras</div>
+                <div class="fab-svg-content" id="fabSvgTrasera"></div>
+            </div>
+            <div class="fab-svg-panel">
+                <div class="fab-svg-titulo">Vista Frontal — tirador</div>
+                <div class="fab-svg-content" id="fabSvgFrontal"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     BARRA DE ACCIONES DEL PRESUPUESTO (banda fija superior)
+══════════════════════════════════════════════════════════════ -->
+<div id="presu-barra">
+    <img class="barra-logo"
+         src="https://jdurba.github.io/General/img/LogoAdinorBlanco.png"
+         alt="ADINOR" />
+    <span class="presu-barra-titulo">Vitrinas · Presupuesto</span>
+    <button type="button" id="presuBtnVolver">⪡ Atrás</button>
+    <button type="button" id="presuBtnPDF">📄 Generar PDF</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     VISTA PRESUPUESTO — Informe en hoja A4
+══════════════════════════════════════════════════════════════ -->
+<section id="presuVista">
+    <div id="presu-informe-container">
+
+        <div class="informe-header">
+            <div class="informe-header-top">
+                <img class="informe-header-logo"
+                     src="https://jdurba.github.io/General/img/LOGO_2025_Negro.png"
+                     alt="Adinor" />
+                <h1>Vitrinas · Presupuesto</h1>
+                <span class="informe-fecha" id="presuFecha"></span>
+            </div>
+        </div>
+
+        <div class="bloque-titulo">Parámetros seleccionados</div>
+        <div class="presu-params-grid">
+            <div class="presu-params-img" id="presuImagen"></div>
+            <div class="informe-params" id="presuDatos"></div>
+        </div>
+
+        <div class="informe-nota" id="presuNota" style="display:none"></div>
+
+        <div class="informe-aviso-templado">IMPORTANTE: Todos los cálculos están realizados para emplear vidrio templado de 4 mm</div>
+
+        <div class="bloque-titulo">Artículos</div>
+        <table class="tabla-informe">
+            <thead>
+                <tr>
+                    <th style="width:16%">Código</th>
+                    <th>Descripción</th>
+                    <th class="num" style="width:8%">Cant.</th>
+                    <th class="num" style="width:14%">P. Unit.</th>
+                    <th class="num" style="width:14%">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="presuArticulos"></tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="aviso-copia">Haz clic en cualquier celda resaltada para copiar su contenido</td>
+                    <td class="num">TOTAL</td>
+                    <td class="num" id="presuTotal">—</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="informe-consultar-motivo" id="presuMotivo" style="display:none"></div>
+
+        <div class="informe-version" id="presuVersion"></div>
+
+    </div>
+</section>
+
+<!-- Ayuda (?) — mismo comportamiento que el resto del ecosistema -->
+<script>
+let _helpBtn = null;
+function toggleHelp(btn) {
+  const pop = document.getElementById('help-popover');
+  if (_helpBtn === btn && pop.classList.contains('visible')) {
+    pop.classList.remove('visible'); _helpBtn = null; return;
+  }
+  _helpBtn = btn;
+  const r = btn.getBoundingClientRect();
+  // Desplazamiento a la derecha: el (?) está en la columna de cotas; sin offset
+  // el cuadro las taparía. Lo corremos ~280px para que caiga sobre la columna
+  // central/SVG y las cotas queden visibles mientras se lee la ayuda.
+  const OFFSET_X = 150;
+  pop.style.top  = (r.bottom +1) + 'px';
+  pop.style.left = Math.min(r.left - 4 + OFFSET_X, window.innerWidth - 440) + 'px';
+  pop.classList.add('visible');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.btn-help') && !e.target.closest('#help-popover')) {
+    document.getElementById('help-popover').classList.remove('visible');
+    _helpBtn = null;
+  }
+});
+</script>
+
+</body>
+</html>
