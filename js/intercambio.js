@@ -122,8 +122,19 @@ function nombreFicheroIntercambio() {
 
 function exportarConfiguracion(ev) {
     ev?.preventDefault();
-    if (!puedeExportar()) {
-        aviso(motivoNoExportar() || 'La configuración no está completa.');
+    const motivo = motivoNoExportar();
+    if (motivo) {
+        // Si el dato que falta está en el configurador, se ofrece ir allí:
+        // decir "falta el Nº Pedido" sin llevar a donde se rellena no basta.
+        if (faltaCabecera()) {
+            confirmar(
+                `${motivo}\n\nSon obligatorios para exportar y se rellenan en el ` +
+                'configurador, en el panel de la derecha.\n\n¿Quieres volver para completarlos?',
+                volverConfigurador
+            );
+        } else {
+            aviso(motivo);
+        }
         return;
     }
 
@@ -219,9 +230,18 @@ function motivoNoExportar() {
     if (typeof cotasValidas === 'function' && !cotasValidas())
         return `Hay cotas de bisagra por debajo del mínimo (${CONFIG.bisagras_C_minimo} mm)`;
     if (typeof bisagrasCompletas === 'function' && !bisagrasCompletas())
-        return 'Selecciona montaje, base y color de bisagra';
-    if (!(state.numPedido || '').trim()) return 'Falta el Nº Pedido (obligatorio para exportar)';
-    if (!(state.cliente   || '').trim()) return 'Falta el Cliente (obligatorio para exportar)';
+        return 'Selecciona el montaje, la base y el color de bisagra';
+    return faltaCabecera();
+}
+
+// Lo que falta en el Form1 se trata aparte: el usuario está en otra pantalla
+// y no puede adivinar que el problema está en la anterior.
+function faltaCabecera() {
+    const sinPedido  = !(state.numPedido || '').trim();
+    const sinCliente = !(state.cliente   || '').trim();
+    if (sinPedido && sinCliente) return 'Faltan el Nº Pedido y el Cliente.';
+    if (sinPedido)               return 'Falta el Nº Pedido.';
+    if (sinCliente)              return 'Falta el Cliente.';
     return null;
 }
 
