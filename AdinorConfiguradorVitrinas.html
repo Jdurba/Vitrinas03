@@ -2264,11 +2264,11 @@
 
                     <div class="datos-pedido">
                         <div class="form-group">
-                            <label for="numPedido">Nº Pedido <span class="opcional">(opcional)</span></label>
+                            <label for="numPedido">Nº Pedido <span class="opcional">(obligatorio para exportar)</span></label>
                             <input type="text" id="numPedido" name="numPedido" placeholder="Ej: S2200" autocomplete="off">
                         </div>
                         <div class="form-group">
-                            <label for="cliente">Cliente / Referencia <span class="opcional">(opcional)</span></label>
+                            <label for="cliente">Cliente / Referencia <span class="opcional">(obligatorio para exportar)</span></label>
                             <input type="text" id="cliente" name="cliente" placeholder="Ej: Integrale, S.A." autocomplete="off">
                         </div>
                         <div class="form-group">
@@ -2300,10 +2300,10 @@
 <script src="js/autotable_min.js?v=1"></script>
 <script src="js/config.js?v=6" defer></script>
 <script src="js/configurador.js?v=10" defer></script>
-<script src="js/fabricacion.js?v=10" defer></script>
+<script src="js/fabricacion.js?v=11" defer></script>
 <script src="js/pdfVitrinas.js?v=12" defer></script>
 <script src="js/presupuesto.js?v=17" defer></script>
-<script src="js/intercambio.js?v=8" defer></script>
+<script src="js/intercambio.js?v=9" defer></script>
 
 
 <!-- ==========================================
@@ -2320,7 +2320,7 @@
         <button class="fab-btn-volver" id="fabBtnVolver">⪡ Atrás</button>
         <button class="fab-btn-pdf-top" id="fabBtnPresupuesto" disabled title="Selecciona las bisagras">🧾 Presupuesto</button>
         <button class="fab-btn-pdf-top" id="fabBtnPDF" disabled title="Selecciona las bisagras">📄 Generar PDF</button>
-        <button type="button" class="fab-btn-pdf-top" id="fabBtnExportar" disabled title="Selecciona las bisagras">💾 Exportar</button>
+        <button type="button" class="fab-btn-pdf-top" id="fabBtnExportar" title="Exportar configuración para enviar">💾 Exportar</button>
     </div>
 
     <!-- Solo visible tras importar: aviso de solo lectura + los dos campos editables -->
