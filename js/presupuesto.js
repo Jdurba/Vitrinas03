@@ -470,6 +470,10 @@ function pintarInforme(r) {
     const celUnit = (l) => l.consultar
         ? '<span class="incluido">consultar</span>'
         : (l.precioUnit != null ? fmtEur(l.precioUnit) : '');
+    // Valor que se copia a Odoo: número puro con coma decimal, sin separador
+    // de miles ni símbolo de moneda (lo que se ve lleva formato, lo que se
+    // copia no: Odoo rechaza "1.234,56 €").
+    const numOdoo = (n) => n.toFixed(2).replace('.', ',');
     const celPrecio = (l) => l.consultar
         ? '<span class="incluido">consultar</span>'
         : fmtEur(l.importe);
@@ -480,11 +484,15 @@ function pintarInforme(r) {
         // La denominación solo es copiable en la vitrina: la de los complementos
         // viene del CSV y ya existe en Odoo con su propia descripción.
         const denomAttr = l.tipo === 'vitrina' ? ` data-copia="${esc(l.denom)}"` : '';
+        // P. Unit. copiable solo en la vitrina: es el único precio que se teclea
+        // en Odoo (los complementos ya tienen tarifa propia en el artículo).
+        const unitAttr = (l.tipo === 'vitrina' && !l.consultar && l.precioUnit != null)
+            ? ` data-copia="${numOdoo(l.precioUnit)}"` : '';
         filas += `<tr>
             <td class="cod" data-copia="${esc(l.codigo)}">${l.codigo}</td>
             <td${denomAttr}>${l.denom}${dtoTxt}</td>
             <td class="num">${l.cantidad}</td>
-            <td class="num">${celUnit(l)}</td>
+            <td class="num"${unitAttr}>${celUnit(l)}</td>
             <td class="num">${celPrecio(l)}</td>
         </tr>`;
 

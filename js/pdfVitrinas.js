@@ -519,6 +519,11 @@ async function generarPDFVitrinas(pedido, cliente) {
         const areaTop = y;              // inicio del área (tras separador)
         const areaBottom = H - mB;      // sin pie: hasta el margen inferior
         const bloqueAlto = (areaBottom - areaTop) / 2;
+
+        // Banda reservada al pie de la columna izquierda para la conformidad
+        // del cliente. Es fija: no depende de dónde acabe el tirador ni la nota.
+        const CONF_H   = 38;
+        const confTop  = areaBottom - CONF_H;
         const bloque2Top = areaTop;
         const bloque3Top = areaTop + bloqueAlto;
         const yStartCols = areaTop;
@@ -662,11 +667,29 @@ async function generarPDFVitrinas(pedido, cliente) {
             y += 7;
             pdf.setFontSize(8.5); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(60);
             for (const ln of pdf.splitTextToSize(notaFab, colIzqW - 6)) {
-                if (y > areaBottom - 4) break;
+                if (y > confTop - 6) break;   // el recuadro de conformidad manda
                 pdf.text(ln, mL + 3, y + 3);
                 y += 4.5;
             }
         }
+
+        // ── COL IZQ: CONFORMIDAD DEL CLIENTE (solo PDF) ──
+        // Posición fija al pie de la columna izquierda: el cliente firma el
+        // diseño sobre esta misma hoja, así que debe salir siempre en el
+        // mismo sitio, con o sin tirador y con o sin observaciones.
+        seccion('Conforme con el diseño', mL, colIzqW, confTop);
+        pdf.setDrawColor(183, 184, 182);
+        pdf.setLineWidth(0.3);
+        pdf.rect(mL, confTop, colIzqW, CONF_H, 'S');
+
+        const firmaY  = confTop + CONF_H - 5;
+        const fechaX  = mL + colIzqW * 0.70;
+        pdf.setFontSize(8); pdf.setFont('helvetica', 'normal'); pdf.setTextColor(100, 100, 100);
+        pdf.text('Firmado:', mL + 3, firmaY);
+        pdf.text('Fecha:',   fechaX, firmaY);
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(mL + 17, firmaY + 1, fechaX - 5,           firmaY + 1);
+        pdf.line(fechaX + 12, firmaY + 1, mL + colIzqW - 3, firmaY + 1);
 
         // ── COLUMNA DERECHA: cada vista ocupa su bloque completo ──
         // Dibujo VECTORIAL NATIVO (primitivas jsPDF) → PDF ligero y nítido.
